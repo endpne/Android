@@ -16,7 +16,6 @@ jobs:
         with:
             repository: saltpi/iPlay
             ref: 'develop'
-            token: ${{ secrets.REPO_TOKEN }}
             submodules: recursive
 
       - name: ☕️ set up JDK
