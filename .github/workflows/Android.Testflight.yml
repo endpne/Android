@@ -1,4 +1,4 @@
-name: iOS Testflight
+name: Android Testflight
 on:
   workflow_dispatch:
     inputs:
@@ -14,53 +14,36 @@ jobs:
       - name: 🛠️ Checkout repository
         uses: actions/checkout@v4
         with:
-            repository: saltpi/iPlay.Apple
-            ref: 'dev/kernel'
+            repository: saltpi/iPlay
+            ref: 'develop'
             token: ${{ secrets.REPO_TOKEN }}
             submodules: recursive
 
-      - name: 🔑 Import code sign
-        continue-on-error: true
-        uses: apple-actions/import-codesign-certs@v3
+      - name: ☕️ set up JDK
+        uses: actions/setup-java@v3
         with:
-          p12-file-base64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
-          p12-password: ${{ secrets.BUILD_CERTIFICATE_PASSWORD }}
-        
-      - name: 📄 Download provisioning profiles
-        uses: apple-actions/download-provisioning-profiles@v4
-        with:
-          bundle-id: top.ourfor.app.iPlayClient
-          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
-          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
-          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+            java-version: '17'
+            distribution: 'zulu'
+            cache: gradle
 
-      - name: 🔢 Update Build Number
-        id: update_build_number
-        uses: saltpi/update-testflight-build-number@v5
-        with:
-          app-id: '6480576133'
-          platform: 'IOS'
-          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
-          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
-          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
-
-      - name: 🧾 Print Build Number
+      - name: 🧬 Build
+        env:
+          scheme: ${{ 'default' }}
+          DEVELOPER_DIR: /Applications/Xcode_15.4.app/Contents/Developer
         run: |
-          echo "Build Number: ${{ steps.update_build_number.outputs.build-number }}"
-          cat iPlay.xcodeproj/project.pbxproj | grep -A 1 'CURRENT_PROJECT_VERSION = '
+          make all
           
-      - name: 🚀 Build app
-        shell: bash
+      - name: ☁️ Upload to Onedrive
         run: |
-          git apply script/ios/*.patch --allow-empty
-          next_build_number=$((${{ steps.update_build_number.outputs.build-number }} + 1))
-          export BUILD_NUMBER=$next_build_number
-          ./script/build_ios.sh
-
-      - name: ☁️ Upload to TestFlight
-        uses: apple-actions/upload-testflight-build@v3
-        with:
-          app-path: .build/Artifacts/iPlay.ipa/iPlay.ipa
-          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
-          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
-          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+          version_code="$(git rev-list --count HEAD)"
+          buildtime=$(date '+%Y%m%d.%H%M')
+          wget https://drive.ourfor.top/tools/upload_session.py -O upload.py
+          python -m pip install requests tqdm
+          python upload.py --url "https://drive.ourfor.top/od_bot/build/iPlay/Android/iPlay_arm64_v8a_build_${version_code}.apk" \
+            --file "$PWD/build/iPlay-arm64-v8a.apk" \
+            --token "${{ secrets.ONEDRIVE_CLIENT_ID }}"
+          echo "https://drive.ourfor.top/od_bot/build/iPlay/Android/iPlay_arm64_v8a_build_${version_code}.apk" > "$PWD/latest.apk.url"
+          python upload.py --url "https://drive.ourfor.top/od_bot/build/iPlay/Android/latest.apk.url" \
+            --file "$PWD/latest.apk.url" \
+            --token "${{ secrets.ONEDRIVE_CLIENT_ID }}"
+        shell: bash
