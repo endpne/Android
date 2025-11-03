@@ -17,6 +17,7 @@ jobs:
             repository: saltpi/iPlay
             ref: 'develop'
             submodules: recursive
+            fetch-depth: 0
 
       - name: ☕️ set up JDK
         uses: actions/setup-java@v3
