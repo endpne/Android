@@ -32,17 +32,35 @@ jobs:
         run: |
           make all
           
-      - name: ☁️ Upload to Onedrive
-        run: |
-          version_code="$(git rev-list --count HEAD)"
-          buildtime=$(date '+%Y%m%d.%H%M')
-          wget https://drive.ourfor.top/tools/upload_session.py -O upload.py
-          python -m pip install requests tqdm
-          python upload.py --url "https://drive.ourfor.top/od_bot/build/iPlay/Android/iPlay_arm64_v8a_build_${version_code}.apk" \
-            --file "$PWD/build/iPlay-arm64-v8a.apk" \
-            --token "${{ secrets.ONEDRIVE_CLIENT_ID }}"
-          echo "https://drive.ourfor.top/od_bot/build/iPlay/Android/iPlay_arm64_v8a_build_${version_code}.apk" > "$PWD/latest.apk.url"
-          python upload.py --url "https://drive.ourfor.top/od_bot/build/iPlay/Android/latest.apk.url" \
-            --file "$PWD/latest.apk.url" \
-            --token "${{ secrets.ONEDRIVE_CLIENT_ID }}"
-        shell: bash
+      # - name: ☁️ Upload to Onedrive
+      #   run: |
+      #     version_code="$(git rev-list --count HEAD)"
+      #     buildtime=$(date '+%Y%m%d.%H%M')
+      #     wget https://drive.ourfor.top/tools/upload_session.py -O upload.py
+      #     python -m pip install requests tqdm
+      #     python upload.py --url "https://drive.ourfor.top/od_bot/build/iPlay/Android/iPlay_arm64_v8a_build_${version_code}.apk" \
+      #       --file "$PWD/build/iPlay-arm64-v8a.apk" \
+      #       --token "${{ secrets.ONEDRIVE_CLIENT_ID }}"
+      #     echo "https://drive.ourfor.top/od_bot/build/iPlay/Android/iPlay_arm64_v8a_build_${version_code}.apk" > "$PWD/latest.apk.url"
+      #     python upload.py --url "https://drive.ourfor.top/od_bot/build/iPlay/Android/latest.apk.url" \
+      #       --file "$PWD/latest.apk.url" \
+      #       --token "${{ secrets.ONEDRIVE_CLIENT_ID }}"
+      #   shell: bash
+      - name: 🏷️ Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          repository: endpne/iPlay-Release-Android
+          token: ${{ secrets.GH_RELEASE_TOKEN }}
+          name: Android Build
+          tag_name: android-build
+          make_latest: true
+          body: |
+            Android TestFlight Build
+            
+            Build artifacts:
+            - iPlay.apk (TestFlight package)
+            
+            **Installation Options:**
+            1. Use the .apk file for TestFlight distribution
+          files: |
+            build/iPlay-arm64-v8a.apk
