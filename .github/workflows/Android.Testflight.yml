@@ -14,7 +14,7 @@ jobs:
       - name: 🛠️ Checkout repository
         uses: actions/checkout@v4
         with:
-            repository: saltpi/iPlay
+            repository: saltpi/iPlay.Android
             ref: 'develop'
             submodules: recursive
             fetch-depth: 0
