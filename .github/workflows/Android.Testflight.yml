@@ -61,7 +61,7 @@ jobs:
           repository: endpne/iPlay-Release-Android
           token: ${{ secrets.GH_RELEASE_TOKEN }}
           name: Android Build ${{ steps.update_build_number.outputs.version_code }}
-          tag_name: android-build-${{ steps.update_build_number.outputs.version_code }}
+          tag_name: v1.0.${{ steps.update_build_number.outputs.version_code }}
           make_latest: true
           body: |
             Android TestFlight Build
