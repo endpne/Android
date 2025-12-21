@@ -64,8 +64,9 @@ jobs:
           tag_name: v1.0.${{ steps.update_build_number.outputs.version_code }}
           make_latest: true
           body: |
-            Android TestFlight Build
-            
+            ✈️ Android TestFlight Build
+            ⚠️ 注意: 更新前备份站点数据到本地文件
+            ✨ 更新: 修复一些已知问题
             Build artifacts:
             - iPlay.apk (TestFlight package)
             
