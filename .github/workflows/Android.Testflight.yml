@@ -78,7 +78,7 @@ jobs:
 
       - name: 🚀 Upload to Google Play (Internal Testing)
         uses: r0adkll/upload-google-play@v1.1.3
-        if: startsWith(github.ref, 'refs/heads/main')
+        if: startsWith(github.ref, 'refs/heads/release')
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_CONFIG_JSON }}
           packageName: top.ourfor.app.iplay
