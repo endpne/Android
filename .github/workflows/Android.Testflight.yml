@@ -76,7 +76,7 @@ jobs:
             build/iPlay-arm64-v8a.apk
             build/iPlay.aab
 
-      - name: 🚀 Upload to Google Play (Internal Testing)
+      - name: 🚀 Upload to Google Play (Release)
         uses: r0adkll/upload-google-play@v1.1.3
         if: startsWith(github.ref, 'refs/heads/release')
         with:
