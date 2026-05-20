@@ -83,7 +83,8 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_CONFIG_JSON }}
           packageName: top.ourfor.app.iplay
           releaseFiles: build/iPlay.aab
-          track: internal
+          track: production
           status: completed
+          whatsNewDirectory: distribution/whatsnew
           # changesNotSentForReview: true
 
