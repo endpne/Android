@@ -37,7 +37,7 @@ jobs:
           version_name="v1.0 ${build_id}"
           echo "Building iCast ${version_name} (${version_code})"
           cd android
-          ./gradlew-java21 :icast:assembleFossRelease :icast:bundlePlayRelease \
+          ./gradlew :icast:assembleFossRelease :icast:bundlePlayRelease \
             -PversionName="${version_name}" \
             -PversionCode="${version_code}" \
             --stacktrace
