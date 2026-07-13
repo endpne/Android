@@ -54,26 +54,26 @@ jobs:
           echo "version_code=$version_code" >> $GITHUB_OUTPUT
           echo "buildtime=$buildtime" >> $GITHUB_OUTPUT
 
-      - name: 🏷️ Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          repository: endpne/iCast-Release-Android
-          token: ${{ secrets.GH_RELEASE_TOKEN }}
-          name: iCast Android Build ${{ steps.update_build_number.outputs.version_code }}
-          tag_name: v1.0.${{ steps.update_build_number.outputs.version_code }}
-          make_latest: true
-          body: |
-            ✈️ iCast Android TestFlight Build
-            ⚠️ 注意: 更新前备份站点数据到本地文件
-            ✨ 更新: 修复一些已知问题
-            Build artifacts:
-            - iCast.apk (TestFlight package)
+      # - name: 🏷️ Create GitHub Release
+      #   uses: softprops/action-gh-release@v2
+      #   with:
+      #     repository: endpne/iCast-Release-Android
+      #     token: ${{ secrets.GH_RELEASE_TOKEN }}
+      #     name: iCast Android Build ${{ steps.update_build_number.outputs.version_code }}
+      #     tag_name: v1.0.${{ steps.update_build_number.outputs.version_code }}
+      #     make_latest: true
+      #     body: |
+      #       ✈️ iCast Android TestFlight Build
+      #       ⚠️ 注意: 更新前备份站点数据到本地文件
+      #       ✨ 更新: 修复一些已知问题
+      #       Build artifacts:
+      #       - iCast.apk (TestFlight package)
 
-            **Installation Options:**
-            1. Use the .apk file for TestFlight distribution
-          files: |
-            build/iCast.apk
-            build/iCast.aab
+      #       **Installation Options:**
+      #       1. Use the .apk file for TestFlight distribution
+      #     files: |
+      #       build/iCast.apk
+      #       build/iCast.aab
 
       - name: 🚀 Upload to Google Play (Internal Testing)
         uses: r0adkll/upload-google-play@v1.1.3
