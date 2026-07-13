@@ -1,0 +1,87 @@
+name: Android iCast Testflight
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Name of the branch"
+        required: false
+        default: ""
+
+jobs:
+  build-and-release:
+    runs-on: macos-26
+    steps:
+      - name: 🛠️ Checkout repository
+        uses: actions/checkout@v4
+        with:
+          repository: saltpi/iPlay.Android
+          ref: ${{ inputs.ref || 'develop' }}
+          submodules: recursive
+          fetch-depth: 0
+          token: ${{ secrets.REPO_TOKEN }}
+
+      - name: ☕️ set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'zulu'
+          cache: gradle
+
+      - name: 🧬 Build iCast
+        env:
+          scheme: ${{ 'default' }}
+        run: |
+          version_code="$(git rev-list --count HEAD)"
+          build_id="$(git rev-parse --short HEAD)"
+          version_name="v1.0 ${build_id}"
+          echo "Building iCast ${version_name} (${version_code})"
+          cd android
+          ./gradlew :icast:assembleFossRelease :icast:bundlePlayRelease \
+            -PversionName="${version_name}" \
+            -PversionCode="${version_code}" \
+            --stacktrace
+          cd ..
+          mkdir -p build
+          cp android/icast/build/outputs/apk/foss/release/icast-foss-release.apk build/iCast.apk
+          cp android/icast/build/outputs/bundle/playRelease/icast-play-release.aab build/iCast.aab
+
+      - name: 🔢 Update Build Number
+        id: update_build_number
+        run: |
+          version_code="$(git rev-list --count HEAD)"
+          buildtime=$(date '+%Y%m%d.%H%M')
+          echo "version_code=$version_code" >> $GITHUB_OUTPUT
+          echo "buildtime=$buildtime" >> $GITHUB_OUTPUT
+
+      - name: 🏷️ Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          repository: endpne/iCast-Release-Android
+          token: ${{ secrets.GH_RELEASE_TOKEN }}
+          name: iCast Android Build ${{ steps.update_build_number.outputs.version_code }}
+          tag_name: v1.0.${{ steps.update_build_number.outputs.version_code }}
+          make_latest: true
+          body: |
+            ✈️ iCast Android TestFlight Build
+            ⚠️ 注意: 更新前备份站点数据到本地文件
+            ✨ 更新: 修复一些已知问题
+            Build artifacts:
+            - iCast.apk (TestFlight package)
+
+            **Installation Options:**
+            1. Use the .apk file for TestFlight distribution
+          files: |
+            build/iCast.apk
+            build/iCast.aab
+
+      - name: 🚀 Upload to Google Play (Internal Testing)
+        uses: r0adkll/upload-google-play@v1.1.3
+        if: startsWith(github.ref, 'refs/heads/main')
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_CONFIG_JSON }}
+          packageName: top.ourfor.app.icast
+          releaseFiles: build/iCast.aab
+          track: internal
+          status: completed
+          # changesNotSentForReview: true
